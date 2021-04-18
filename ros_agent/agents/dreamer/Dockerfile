@@ -7,7 +7,7 @@
 
 # This is an auto generated Dockerfile for ros:ros-core
 # generated from docker_images/create_ros_core_image.Dockerfile.em
-FROM ubuntu:focal
+FROM ubuntu:bionic
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -27,19 +27,19 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys BA6932366A755776
 
 # setup sources.list
-RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
-RUN echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu/ focal main" > /etc/apt/sources.list.d/deadsnakes.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros1-latest.list
+RUN echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu/ bionic main" > /etc/apt/sources.list.d/deadsnakes.list
 
 # setup environment
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-ENV ROS_DISTRO noetic
+ENV ROS_DISTRO melodic
 
 # install ros packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.6 \
-    ros-noetic-ros-core=1.5.0-1* \
+    ros-melodic-ros-core=1.4.1-0* \
     && rm -rf /var/lib/apt/lists/*
 
 # ###################
@@ -48,16 +48,15 @@ RUN mkdir -p /ws/src/f1tenth_agent_ros/
 WORKDIR /ws/src/f1tenth_agent_ros/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3.6 python3.6-dev python3-pip git wget unzip make gcc g++ \
+    python3.7 python3.7-dev python3-pip git wget unzip make gcc g++ \
     libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev zip libjpeg8-dev liblapack-dev libblas-dev gfortran
 #    rm -rf /var/lib/apt/lists/*
 
 # install python requirements for this agent
 ARG AGENT
 COPY agents/${AGENT}/requirements.txt .
-RUN python3.6 -m pip install --no-cache-dir -r requirements.txt
-
-RUN apt-get install -y --no-install-recommends ros-noetic-ackermann-msgs ros-noetic-tf python3-catkin-tools python3-catkin-pkg
+RUN python3.7 -m pip install --no-cache-dir -r requirements.txt 
+RUN apt-get install -y --no-install-recommends ros-melodic-ackermann-msgs ros-melodic-tf python3-catkin-tools python3-catkin-pkg
 
 COPY entrypoint.sh .
 COPY CMakeLists.txt .
@@ -66,7 +65,7 @@ COPY agents/${AGENT}/src ./src
 COPY helpers/* ./src/
 
 RUN /bin/bash -c "cd /usr/bin/; rm /usr/bin/python3; ln -s python3.6 python3"
-RUN /bin/bash -c "source /opt/ros/noetic/setup.bash; cd /ws; catkin build"
+RUN /bin/bash -c "source /opt/ros/melodic/setup.bash; cd /ws; catkin build"
 RUN chmod a+x src/* && chmod +x entrypoint.sh
 
 ARG MODEL
